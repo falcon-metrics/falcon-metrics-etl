@@ -1,0 +1,418 @@
+service: falcon-metrics-etl
+
+package:
+    individually: false
+    exclude:
+        - elasticMQ
+
+plugins:
+    - serverless-dotenv-plugin
+    - serverless-webpack
+    - serverless-s3-local
+    - serverless-offline-sns
+    - serverless-offline-sqs
+    - serverless-offline
+    - serverless-prune-plugin
+    - serverless-log-forwarding
+
+custom:
+    s3:
+        host: localhost
+        directory: /tmp ##you need to mkdir /tmp/local-bucket
+    resources:
+        Resources:
+            NewResource:
+            Type: AWS::S3::Bucket
+            Properties:
+                BucketName: falcon-metrics-local-bucket
+    bundle:
+        ignorePackages:
+        - pg-native
+    webpack:
+        webpackConfig: ./webpack.config.js
+        includeModules: true
+
+    serverless-offline:
+        # change the ports so they don't interfere with other services
+        httpPort: 4010
+        webSocketPort: 4011
+        lambdaPort: 4012
+        # auto-refresh doesn't work too well with node unless we use child processes
+        useChildProcesses: true
+        
+    serverless-offline-sns:
+        host: 0.0.0.0
+        sns-subscribe-endpoint: 0.0.0.0
+        debug: true
+        subscriptions:
+            - topic:
+                arn: arn:aws:sns:ap-southeast-2:123456789012:SnapshotItemTopic
+                rawMessageDelivery: 'true'
+                protocol: sqs
+              queue: http://0.0.0.0:9324/123456789012/SnapshotItemQueue
+
+    logForwarding:
+        destinationARN: arn:aws:lambda:ap-southeast-2:906466243975:function:etlCentralisedLogging
+    prune:
+        automatic: true
+        number: 5
+
+    serverless-offline-sqs:
+        autoCreate: true
+        apiVersion: '2012-11-05'
+        endpoint: http://0.0.0.0:9324
+        region: ap-southeast-2
+        accessKeyId: root
+        secretAccessKey: root
+        skipCacheInvalidation: false
+
+useDotenv: true
+
+provider:
+    name: aws
+    stage: ${env:STAGE, 'dev'}
+    region: ${env:AWS_DEFAULT_REGION,'ap-southeast-2'}
+    runtime: nodejs18.x
+    timeout: 300 # 5 minutes, these services are not bound to api timeouts
+    apiName: ${self:service.name, 'etl'}
+    environment:
+        # Env variable for optimization. TCP connections are reused
+        # This option is not present in AWS SDK v3. 
+        # TODO: Remove this after upgrade to v3
+        AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+
+        STAGE: ${self:provider.stage}
+        LOG_LEVEL: ${env:LOG_LEVEL, 'error'}
+
+        # Make the stack traces point to the original function
+        NODE_OPTIONS: "--enable-source-maps"
+
+        # Used for mock data
+        MOCK_DATA_CONTEXTS: 'test-context,child-context-1,grand-child-context-1,grand-child-context-2,child-context-2,grand-child-context-3,grand-child-context-4'
+
+    vpc:
+        securityGroupIds:
+        - sg-124ec764
+        subnetIds:
+        - subnet-7c57ae1a
+        - subnet-30c32978
+        - subnet-b01e75e8
+
+    iamRoleStatements:
+    -   Effect: Allow
+        Action:
+        - sns:*
+        Resource: "*"
+    -   Effect: Allow
+        Action:
+        - lambda:ListFunctions
+        - lambda:ListEventSourceMappings
+        - lambda:GetEventSourceMapping
+        - lambda:CreateEventSourceMapping
+        - lambda:UpdateEventSourceMapping
+        Resource: "*"
+    -   Effect: Allow
+        Action:
+        - sqs:*
+        Resource: "*"
+    # TODO this should restrict to allowing just the extractors and just to the datasource related secrets
+    -   Effect: Allow
+        Action:
+        - secretsmanager:*
+        Resource: "*"
+    -   Effect: Allow
+        Action:
+        - s3:getObject
+        - s3:putObject
+        Resource: 
+        - "arn:aws:s3:::falcon-metrics-mock-data/*"
+        - "arn:aws:s3:::falcon-metrics-etl-extract/*"
+
+functions:
+    extractContextsScheduler:
+        handler: src/scheduler/handler.kickOffExtractContexts
+        memorySize: 128
+        events:
+            # - schedule:
+            #     name: extract-contexts-schedule
+            #     description: 'kick off extract contexts schedule'
+            #     # Reduce the clash with extract states
+            #     rate: rate(13 minutes) 
+            - httpApi:
+                path: /kick-off-context
+                method: GET
+    extractStatesScheduler:
+        handler: src/scheduler/handler.kickOffExtractStates
+        memorySize: 128
+        events:
+            - schedule:
+                name: extract-states-schedule
+                description: 'kick off extract states schedule'
+                rate: rate(5 minutes) 
+            # - httpApi:
+            #     path: /kick-off-states
+            #     method: GET
+
+    # extractSprintsScheduler:
+    #     handler: src/scheduler/handler.kickOffExtractSprints
+    #     memorySize: 128
+    #     events:
+    #     -   ${file(./serverless/schedule.js)}
+      
+    extractStates:
+        handler: src/handlers/extract_states_handler.process
+        memorySize: 512
+        timeout: 900
+        events:
+        -   sns: "falcon-metrics-extract-states"
+
+    reingestData:
+        handler: src/handlers/extract_states_handler.reingest
+        memorySize: 10240
+        timeout: 900
+        events:
+            # Uncomment for development
+            # - httpApi:
+            #     path: /reingest
+            #     method: GET
+            - sns: "falcon-metrics-reingest-data"
+
+    #     extractSprints:
+    #         handler: src/handlers/extract_sprints_handler.process
+    #         memorySize: 512
+    #         timeout: 900
+    #         events:
+    #         -   sns: "falcon-metrics-extract-sprints"
+
+    extractContexts: 
+        handler: src/handlers/extract_contexts_handler.processQueuedContexts
+        memorySize: 512
+        timeout: 900
+        reservedConcurrency: 10
+        batchSize: 5
+        events:
+          - sqs:
+                batchSize: 5
+                arn: arn:aws:sqs:ap-southeast-2:906466243975:ExtractContextsQueue.fifo
+        environment:
+            # the backend configuration for boards will ask env vars for the value of its token
+            JC_TOKEN: ${env:JC_TOKEN, ''}
+    
+    extractVCDataScheduler: 
+        handler: src/handlers/extract_git_data_handler.schedule
+        memorySize: 512
+        timeout: 900
+        events:
+            # - httpApi:
+            #     path: /git-extract-schedule
+            #     method: GET
+            - schedule:
+                name: extract-vcdata-schedule
+                description: 'kick off extract version control data schedule'
+                rate: rate(1 hour)
+
+    extractVCData: 
+        handler: src/handlers/extract_git_data_handler.handler
+        memorySize: 2048
+        timeout: 900
+        events:
+            - sqs:
+                batchSize: 1
+                queueName: ExtractVCDataQueue
+                arn:
+                    Fn::GetAtt:
+                    - ExtractVCDataQueue
+                    - Arn
+            - sns: "extract-vc-project"
+
+    extractInsights:
+        handler: src/handlers/extract_insights_handler.process
+        memory: 512
+        timeout: 900
+        events:
+        - schedule:
+            name: extract-insights-schedule
+            description: 'kick off extract insights schedule'
+            rate: rate(24 hours)
+
+    processRevisions: 
+        handler: src/handlers/process_revision_handler.process
+        memorySize: 512
+        timeout: 120
+        reservedConcurrency: 10
+        batchSize: 50
+        events:
+          - sqs:
+              queueName: ProcessRevisionQueue
+              arn:
+                Fn::GetAtt:
+                  - ProcessRevisionQueue
+                  - Arn
+    # # Data loading processors
+    mapWorkitemsToContextAurora:
+        handler: src/workitem/context_mapping_handler.mapWorkitemsToContextAurora
+        memorySize: 128
+        events:
+           - sqs:
+                queueName: ContextWorkItemMappingQueue
+                arn:
+                    Fn::GetAtt:
+                        - ContextWorkItemMappingQueue
+                        - Arn
+
+    # Deprecated - Deleting asynchronously causes race conditions. Not reliable
+    # The design has been changed to delete synchronously
+    # TODO: Remove this
+    deletePreviousWorkItemMapContext:
+        handler: src/workitem/context_mapping_handler.deletePreviousWorkItemMapContext
+        memorySize: 128
+        events:
+        -    sns: "context-mapitems-delete"
+
+    loadStateAurora:
+        handler: src/workitem/load_handler.loadStateAurora
+        memorySize: 128
+        events:
+        -    sns: "load-stateitem"
+
+    loadSnapshotAuroraSQS:
+        handler: src/workitem/load_handler.loadSnapshotAuroraSQS
+        memorySize: 256
+        reservedConcurrency: 10
+        events:
+          - sqs:
+              queueName: SnapshotItemQueue
+              arn:
+                Fn::GetAtt:
+                  - SnapshotItemQueue
+                  - Arn
+                  
+    #     mapWorkitemsToSprint:
+    #         handler: src/workitem/sprint/sprint_mapping_handler.mapWorkitemsToSprint
+    #         memorySize: 128
+    #         batchSize: 50
+    #         reservedConcurrency: 10
+    #         events:
+    #             - sqs:
+    #                 arn: arn:aws:sqs:ap-southeast-2:906466243975:SprintMappingQueue
+
+
+    extractInsightsView:
+        handler: src/handlers/extract_insights_view_handler.process
+        memorySize: 512
+        timeout: 900
+        events:
+            - sqs:
+                batchSize: 2
+                arn: arn:aws:sqs:ap-southeast-2:906466243975:ExtractPerformanceCheckpointsQueue.fifo
+                
+
+    ##############Notifications###############
+    extractNotificationScheduler:
+        handler: src/scheduler/notification_scheduler.kickOffNotifications
+        memory: 256
+        events:
+        - schedule:
+            name: extract-notification-schedule
+            description: 'kick off extract notification schedule'
+            rate: cron(1 0 * * ? *)
+        # - httpApi:
+        #         path: /notifications ## a place holder event, we will create a eventBridge rule to trigger this function on schedule
+        #         method: GET
+    evaluateNotificationSubscription: 
+        handler: src/handlers/evaluate_threshold_notification_handler.process
+        memorySize: 512
+        timeout: 25
+        reservedConcurrency: 10
+        batchSize: 50
+        events:
+          - sqs:
+              queueName: EvaluateThresholdSubscriptionsQueue
+              arn:
+                Fn::GetAtt:
+                  - EvaluateThresholdSubscriptionsQueue
+                  - Arn
+    sendEmail: 
+        handler: src/handlers/email_service_handler.process
+        memorySize: 512
+        timeout: 25
+        reservedConcurrency: 10
+        batchSize: 50
+        events:
+          - sqs:
+              queueName: NotificationEmailQueue
+              arn:
+                Fn::GetAtt:
+                  - NotificationEmailQueue
+                  - Arn
+
+    ##############Other scheduled events###############
+    # mock data update function
+    # deprecated
+    updateMockDataDate:
+        handler: src/update_mock_data_date/date_update_handler.handler
+        memorySize: 128
+        events:
+        - schedule: cron(1 0 * * ? *)
+    ##############Check deleted item in the datasource###############
+    checkRemovedItemsScheduler:
+        handler: src/scheduler/check_removed_item_requestor.CheckRemovedItem
+        memorySize: 128
+        events:
+        - schedule: cron(1 0 * * ? *) ##runs daily
+            # - httpApi:
+            #         path: /check-removed-items ## a place holder event, we will create a eventBridge rule to trigger this function on schedule
+            #         method: GET
+    checkAndDeleteRemovedJiraItem:
+        handler: src/services/check_deleted_items.checkItemIntegrity
+        memorySize: 512
+        events:
+        -   sns: "check-removed-items"
+
+resources:
+  Resources:
+    #create SQS queues
+    SnapshotItemQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: SnapshotItemQueue
+        VisibilityTimeout: 1000
+
+    ProcessRevisionQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ProcessRevisionQueue
+        VisibilityTimeout: 1000
+
+    ContextWorkItemMappingQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ContextWorkItemMappingQueue
+        VisibilityTimeout: 1000
+
+    ExtractVCDataQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ExtractVCDataQueue
+        VisibilityTimeout: 1000
+
+    #create SNS topics
+    SnapshotItemTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: SnapshotItemTopic
+        Subscription:
+          - Protocol: sqs
+            Endpoint: !GetAtt SnapshotItemQueue.Arn
+    EvaluateThresholdSubscriptionsQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: EvaluateThresholdSubscriptionsQueue
+        VisibilityTimeout: 1000
+
+    NotificationEmailQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: NotificationEmailQueue
+        VisibilityTimeout: 1000
+

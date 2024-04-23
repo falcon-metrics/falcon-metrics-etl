@@ -1,0 +1,23 @@
+{
+    "type": "node",
+    "request": "launch",
+    "name": "Debug Serverless Offline",
+    "cwd": "${workspaceFolder}",
+    "runtimeExecutable": "npm",
+    "runtimeArgs": [
+        "run",
+        "debug"
+    ],
+    "sourceMaps": true,
+    "configurations": [
+        {
+            "name": "Attach by Process ID",
+            "processId": "${command:PickProcess}",
+            "request": "attach",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node"
+        },
+    ]
+}

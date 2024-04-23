@@ -1,0 +1,63 @@
+image: node:18
+
+test:
+    stage: build
+    script:
+        - echo "Building deploy package"
+        - npm install --force --production=false
+        - npm test
+        - echo "Build successful"
+    artifacts:
+      expire_in: 1 hour
+    #   Modify this to add your path
+      paths:
+        - /builds/etl/coverage    
+
+type-check:
+  stage: build
+  script:
+    - echo "Running Typescript compiler"
+    - npm install
+    - npx tsc
+    - echo "Type check completed"
+
+npm-audit:
+    stage: build
+    script:
+        - echo "Running npm audit for critical vulnerabilities"
+        - npm install --force
+        - npm run security-audit:prod
+        - echo "Audit for critical vulnerabilities successful"
+
+deploy_prod:
+    stage: deploy
+    variables:
+        STAGE: prod
+    script:
+        - echo "Deploying to server"
+        - npm install --production=false
+        - npm run deploy
+        - echo "Deployed"
+    environment:
+        name: production
+    only:
+        - master
+
+variables:
+  SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
+  GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
+# This job is failing because the node version has been deprecated by 
+# Sonar cloud. This is the error: 
+# The version of node.js (12) you have used to run this analysis is deprecated and we stopped accepting it.
+# sonarcloud-check:
+#   image:
+#     name: sonarsource/sonar-scanner-cli:latest
+#     entrypoint: [""]
+#   cache:
+#     key: "${CI_JOB_NAME}"
+#     paths:
+#       - .sonar/cache
+#   script:
+#     - sonar-scanner
+#   only:
+#     - master

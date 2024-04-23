@@ -1,0 +1,16 @@
+# local environment configuration
+.env
+
+# package directories
+node_modules
+jspm_packages
+coverage
+
+# Serverless directories
+.serverless
+.webpack
+.dynamodb
+
+# Eclipse IDE
+.settings
+.project

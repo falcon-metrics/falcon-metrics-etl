@@ -1,0 +1,115 @@
+{
+  "name": "etl",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "deploy": "npm run security-audit:prod && npx serverless deploy --force --conceal --debug *",
+    "test": "node ./node_modules/jest/bin/jest.js --coverage -w 1",
+    "offline-debug": "node --inspect ./node_modules/serverless/bin/serverless.js offline | npx pino-pretty",
+    "offline": "node --inspect ./node_modules/serverless/bin/serverless.js offline | npx pino-pretty",
+    "lint": "eslint src/**/*.ts",
+    "format": "eslint --fix src/**/*.ts",
+    "security-audit:prod": "npm audit --omit=dev --audit-level=critical"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.136",
+    "@types/btoa": "^1.2.5",
+    "@types/jest": "^29.5.12",
+    "@types/luxon": "^3.4.2",
+    "@types/node-fetch": "^2.5.12",
+    "@types/pg": "^8.11.4",
+    "@types/uuid": "^9.0.8",
+    "@typescript-eslint/eslint-plugin": "^7.4.0",
+    "@typescript-eslint/parser": "^7.4.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-prettier": "^5.1.3",
+    "husky": "^9.0.11",
+    "jest": "^29.7.0",
+    "jest-mock-extended": "^3.0.5",
+    "npm-force-resolutions": "^0.0.10",
+    "pino-pretty": "^11.0.0",
+    "prettier": "^3.2.5",
+    "serverless": "^3.38.0",
+    "serverless-dotenv-plugin": "^6.0.0",
+    "serverless-log-forwarding": "^3.2.0",
+    "serverless-offline": "^13.3.3",
+    "serverless-offline-scheduler": "^0.5.0",
+    "serverless-offline-sns": "^0.77.2",
+    "serverless-offline-sqs": "^8.0.0",
+    "serverless-prune-plugin": "^2.0.2",
+    "serverless-s3-local": "^0.8.1",
+    "serverless-webpack": "^5.13.0",
+    "ts-jest": "^29.1.1",
+    "ts-loader": "^7.0.1",
+    "typescript": "^5.4.3",
+    "webpack-node-externals": "^1.7.2"
+  },
+  "dependencies": {
+    "@aws-sdk/client-lambda": "^3.540.0",
+    "@aws-sdk/client-sqs": "^3.540.0",
+    "awilix": "^4.3.4",
+    "aws-lambda": "^1.0.7",
+    "aws-sdk": "^2.1584.0",
+    "axios": "^1.6.8",
+    "btoa": "^1.2.1",
+    "dotenv": "^16.4.5",
+    "lodash": "^4.17.21",
+    "log4js": "^6.9.1",
+    "lorem-ipsum": "^2.0.8",
+    "luxon": "^3.4.4",
+    "mathjs": "^12.4.1",
+    "node-fetch": "^2.6.7",
+    "odata": "^1.3.1",
+    "pg": "^8.11.3",
+    "pino": "^8.19.0",
+    "sequelize": "^6.37.1",
+    "slugify": "^1.6.6",
+    "uuid": "^9.0.1",
+    "webpack": "^5.91.0",
+    "yup": "^1.4.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint",
+      "pre-push": "npm test"
+    }
+  },
+  "jest": {
+    "collectCoverage": true,
+    "coverageReporters": [
+      "lcov",
+      "text"
+    ],
+    "coverageDirectory": "coverage",
+    "transform": {
+      ".(ts|tsx)": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|js)$",
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.ts"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ]
+  },
+  "resolutions": {
+    "socket.io-parser": "4.2.1",
+    "loader-utils": "2.0.3",
+    "flat": "5.0.2",
+    "simple-git": "3.16.0",
+    "protobufjs": "6.11.4"
+  }
+}

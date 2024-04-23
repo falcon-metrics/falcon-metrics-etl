@@ -1,0 +1,24 @@
+// Diagram as code - eraser.io
+
+title ETL Process Flow
+
+EventBridge [icon: aws-eventbridge] > ExtractLambda [icon: aws-lambda]: Trigger extract
+activate ExtractLambda
+ExtractLambda > RDS [icon: aws-rds]: Fetch data
+ExtractLambda > SecretsManager [icon: aws-secrets-manager]: Fetch secret
+ExtractLambda > ExternalAPI [icon: globe]: Fetch external data
+ExtractLambda > S3 [icon: aws-s3]: Store items
+ExtractLambda > SQS [icon: aws-sqs]: Push items to queue
+deactivate ExtractLambda
+
+SQS > TransformLambda [icon: aws-lambda]: Trigger transform
+activate TransformLambda
+TransformLambda > S3: Fetch items
+TransformLambda > RDS: Get additional data
+TransformLambda > SQS: Push transformed items
+deactivate TransformLambda
+
+SQS > LoadLambda [icon: aws-lambda]: Trigger load
+activate LoadLambda
+LoadLambda > RDS: Write data
+deactivate LoadLambda

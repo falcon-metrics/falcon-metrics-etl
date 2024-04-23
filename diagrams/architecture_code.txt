@@ -1,0 +1,76 @@
+// Diagram as code - eraser.io
+
+title Cloud Architecture of Flomatika
+
+Frontend {
+  Cloudfront [icon: aws-cloudfront]
+  User [icon: user]
+  Browser [icon: browser]
+  Route53 [icon: aws-route-53]
+}
+
+Authentication {
+  Auth0 [icon: auth0]
+}
+Backend {
+  API Gateway [icon: aws-api-gateway]
+
+  Metrics Calculations [icon: aws-lambda]
+
+  Database {
+    RDS Instances [icon: aws-rds]
+    Database proxy with caching [icon: cache]
+  }
+  
+  ETL {
+    Extract [icon: aws-lambda]
+    Transform [icon: aws-lambda]
+    Load [icon: aws-lambda]
+    EventBridge [icon: aws-eventbridge]
+    SQS - Extract [icon: aws-sqs]
+    SQS - Transform [icon: aws-sqs]
+  }
+
+  Secrets Manager [icon: aws-secrets-manager]
+
+  S3 [icon: aws-s3]
+}
+
+External Services {
+  Contentful [icon: api]
+  MailChimp [icon: api]
+}
+
+
+
+Datasource {
+  Jira or Azure [icon: jira]
+}
+
+User <> Browser
+Browser <> Route53
+Route53 <> Cloudfront
+Browser <> Auth0
+Route53 <> API Gateway
+API Gateway <> Auth0
+API Gateway <> Metrics Calculations
+Metrics Calculations <> Secrets Manager
+Metrics Calculations <> Database proxy with caching
+Database proxy with caching <> RDS Instances
+Metrics Calculations <> External Services
+
+Extract <> Datasource
+EventBridge > Extract
+Extract > S3
+S3 > Transform
+Transform < Database proxy with caching
+Extract <> Secrets Manager
+Transform <> Secrets Manager
+Load <> Secrets Manager
+Load -> Database proxy with caching
+
+Transform > "SQS - Transform"
+Extract > "SQS - Extract"
+"SQS - Extract" > Transform
+"SQS - Transform" > Load
+

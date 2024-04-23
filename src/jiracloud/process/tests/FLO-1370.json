@@ -1,0 +1,275 @@
+{
+	"expand": "operations,versionedRepresentations,editmeta,changelog,renderedFields",
+	"id": "11633",
+	"self": "https://example.atlassian.net/rest/api/3/issue/11633",
+	"key": "FLO-1370",
+	"fields": {
+		"issuetype": {
+			"self": "https://example.atlassian.net/rest/api/3/issuetype/10032",
+			"id": "10032",
+			"description": "",
+			"iconUrl": "https://example.atlassian.net/secure/viewavatar?size=medium&avatarId=10311&avatarType=issuetype",
+			"name": "Feature",
+			"subtask": false,
+			"avatarId": 10311,
+			"hierarchyLevel": 0
+		},
+		"components": [
+			{
+				"self": "https://example.atlassian.net/rest/api/3/component/10127",
+				"id": "10127",
+				"name": "ETL"
+			}
+		],
+		"customfield_10030": null,
+		"project": {
+			"self": "https://example.atlassian.net/rest/api/3/project/10000",
+			"id": "10000",
+			"key": "FLO",
+			"name": "Flomatika",
+			"projectTypeKey": "software",
+			"simplified": false,
+			"avatarUrls": {
+				"48x48": "https://example.atlassian.net/secure/projectavatar?pid=10000&avatarId=10554",
+				"24x24": "https://example.atlassian.net/secure/projectavatar?size=small&s=small&pid=10000&avatarId=10554",
+				"16x16": "https://example.atlassian.net/secure/projectavatar?size=xsmall&s=xsmall&pid=10000&avatarId=10554",
+				"32x32": "https://example.atlassian.net/secure/projectavatar?size=medium&s=medium&pid=10000&avatarId=10554"
+			}
+		},
+		"fixVersions": [],
+		"customfield_10034": {
+			"self": "https://example.atlassian.net/rest/api/3/customFieldOption/10032",
+			"value": "Architecture",
+			"id": "10032"
+		},
+		"customfield_10035": {
+			"self": "https://example.atlassian.net/rest/api/3/customFieldOption/10035",
+			"value": "Platform Engineering",
+			"id": "10035"
+		},
+		"customfield_10036": {
+			"self": "https://example.atlassian.net/rest/api/3/customFieldOption/10047",
+			"value": "Kernel",
+			"id": "10047"
+		},
+		"customfield_10014": "FLO-1368",
+		"customfield_10037": null,
+		"customfield_10029": {
+			"self": "https://example.atlassian.net/rest/api/3/customFieldOption/10020",
+			"value": "Standard",
+			"id": "10020"
+		},
+		"summary": "Ingest link type related",
+		"created": "2021-09-16T15:02:57.045+1000",
+		"customfield_10040": null,
+		"customfield_10041": null,
+		"customfield_10042": null,
+		"customfield_10020": null,
+		"reporter": {
+			"self": "https://example.atlassian.net/rest/api/3/user?accountId=6046f7300b7840006914af1a",
+			"accountId": "6046f7300b7840006914af1a",
+			"emailAddress": "test@example.com",
+			"avatarUrls": {
+				"48x48": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/6046f7300b7840006914af1a/afd51c03-9331-4247-bcf3-35faf1233335/48",
+				"24x24": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/6046f7300b7840006914af1a/afd51c03-9331-4247-bcf3-35faf1233335/24",
+				"16x16": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/6046f7300b7840006914af1a/afd51c03-9331-4247-bcf3-35faf1233335/16",
+				"32x32": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/6046f7300b7840006914af1a/afd51c03-9331-4247-bcf3-35faf1233335/32"
+			},
+			"displayName": "Marco",
+			"active": true,
+			"timeZone": "Australia/Sydney",
+			"accountType": "atlassian"
+		},
+		"customfield_10043": null,
+		"priority": {
+			"self": "https://example.atlassian.net/rest/api/3/priority/3",
+			"iconUrl": "https://example.atlassian.net/images/icons/priorities/medium.svg",
+			"name": "Medium",
+			"id": "3"
+		},
+		"labels": [],
+		"customfield_10038": null,
+		"customfield_10039": null,
+		"issuelinks": [
+			{
+				"id": "12195",
+				"self": "https://example.atlassian.net/rest/api/3/issueLink/12195",
+				"type": {
+					"id": "10000",
+					"name": "Blocks",
+					"inward": "is blocked by",
+					"outward": "blocks",
+					"self": "https://example.atlassian.net/rest/api/3/issueLinkType/10000"
+				},
+				"outwardIssue": {
+					"id": "11562",
+					"key": "FLO-1330",
+					"self": "https://example.atlassian.net/rest/api/3/issue/11562",
+					"fields": {
+						"summary": "Enable option to fetch children and related items for KRs",
+						"status": {
+							"self": "https://example.atlassian.net/rest/api/3/status/10004",
+							"description": "This status is managed internally by Jira Software",
+							"iconUrl": "https://example.atlassian.net/",
+							"name": "Ready to Start",
+							"id": "10004",
+							"statusCategory": {
+								"self": "https://example.atlassian.net/rest/api/3/statuscategory/2",
+								"id": 2,
+								"key": "new",
+								"colorName": "blue-gray",
+								"name": "To Do"
+							}
+						},
+						"priority": {
+							"self": "https://example.atlassian.net/rest/api/3/priority/4",
+							"iconUrl": "https://example.atlassian.net/images/icons/priorities/low.svg",
+							"name": "Low",
+							"id": "4"
+						},
+						"issuetype": {
+							"self": "https://example.atlassian.net/rest/api/3/issuetype/10032",
+							"id": "10032",
+							"description": "",
+							"iconUrl": "https://example.atlassian.net/secure/viewavatar?size=medium&avatarId=10311&avatarType=issuetype",
+							"name": "Feature",
+							"subtask": false,
+							"avatarId": 10311,
+							"hierarchyLevel": 0
+						}
+					}
+				}
+			},
+			{
+				"id": "12194",
+				"self": "https://example.atlassian.net/rest/api/3/issueLink/12194",
+				"type": {
+					"id": "10000",
+					"name": "Blocks",
+					"inward": "is blocked by",
+					"outward": "blocks",
+					"self": "https://example.atlassian.net/rest/api/3/issueLinkType/10000"
+				},
+				"outwardIssue": {
+					"id": "11563",
+					"key": "FLO-1331",
+					"self": "https://example.atlassian.net/rest/api/3/issue/11563",
+					"fields": {
+						"summary": "Enable option to fetch children and related items for the whole obeya on the CRUD",
+						"status": {
+							"self": "https://example.atlassian.net/rest/api/3/status/10004",
+							"description": "This status is managed internally by Jira Software",
+							"iconUrl": "https://example.atlassian.net/",
+							"name": "Ready to Start",
+							"id": "10004",
+							"statusCategory": {
+								"self": "https://example.atlassian.net/rest/api/3/statuscategory/2",
+								"id": 2,
+								"key": "new",
+								"colorName": "blue-gray",
+								"name": "To Do"
+							}
+						},
+						"priority": {
+							"self": "https://example.atlassian.net/rest/api/3/priority/4",
+							"iconUrl": "https://example.atlassian.net/images/icons/priorities/low.svg",
+							"name": "Low",
+							"id": "4"
+						},
+						"issuetype": {
+							"self": "https://example.atlassian.net/rest/api/3/issuetype/10032",
+							"id": "10032",
+							"description": "",
+							"iconUrl": "https://example.atlassian.net/secure/viewavatar?size=medium&avatarId=10311&avatarType=issuetype",
+							"name": "Feature",
+							"subtask": false,
+							"avatarId": 10311,
+							"hierarchyLevel": 0
+						}
+					}
+				}
+			},
+			{
+				"id": "12213",
+				"self": "https://example.atlassian.net/rest/api/3/issueLink/12213",
+				"type": {
+					"id": "10003",
+					"name": "Relates",
+					"inward": "relates to",
+					"outward": "relates to",
+					"self": "https://example.atlassian.net/rest/api/3/issueLinkType/10003"
+				},
+				"inwardIssue": {
+					"id": "11657",
+					"key": "FLO-1386",
+					"self": "https://example.atlassian.net/rest/api/3/issue/11657",
+					"fields": {
+						"summary": "DELETE_ME: test related issue",
+						"status": {
+							"self": "https://example.atlassian.net/rest/api/3/status/10000",
+							"description": "",
+							"iconUrl": "https://example.atlassian.net/",
+							"name": "Backlog",
+							"id": "10000",
+							"statusCategory": {
+								"self": "https://example.atlassian.net/rest/api/3/statuscategory/2",
+								"id": 2,
+								"key": "new",
+								"colorName": "blue-gray",
+								"name": "To Do"
+							}
+						},
+						"priority": {
+							"self": "https://example.atlassian.net/rest/api/3/priority/4",
+							"iconUrl": "https://example.atlassian.net/images/icons/priorities/low.svg",
+							"name": "Low",
+							"id": "4"
+						},
+						"issuetype": {
+							"self": "https://example.atlassian.net/rest/api/3/issuetype/10032",
+							"id": "10032",
+							"description": "",
+							"iconUrl": "https://example.atlassian.net/secure/viewavatar?size=medium&avatarId=10311&avatarType=issuetype",
+							"name": "Feature",
+							"subtask": false,
+							"avatarId": 10311,
+							"hierarchyLevel": 0
+						}
+					}
+				}
+			}
+		],
+		"assignee": {
+			"self": "https://example.atlassian.net/rest/api/3/user?accountId=612c453d6a4c09006a8131b9",
+			"accountId": "612c453d6a4c09006a8131b9",
+			"avatarUrls": {
+				"48x48": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/612c453d6a4c09006a8131b9/e1bf78a6-0e10-49b1-892a-fb4b36cb1375/48",
+				"24x24": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/612c453d6a4c09006a8131b9/e1bf78a6-0e10-49b1-892a-fb4b36cb1375/24",
+				"16x16": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/612c453d6a4c09006a8131b9/e1bf78a6-0e10-49b1-892a-fb4b36cb1375/16",
+				"32x32": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/612c453d6a4c09006a8131b9/e1bf78a6-0e10-49b1-892a-fb4b36cb1375/32"
+			},
+			"displayName": "rich",
+			"active": true,
+			"timeZone": "Australia/Sydney",
+			"accountType": "atlassian"
+		},
+		"updated": "2021-09-20T14:34:49.814+1000",
+		"status": {
+			"self": "https://example.atlassian.net/rest/api/3/status/3",
+			"description": "This issue is being actively worked on at the moment by the assignee.",
+			"iconUrl": "https://example.atlassian.net/images/icons/statuses/inprogress.png",
+			"name": "In Progress",
+			"id": "3",
+			"statusCategory": {
+				"self": "https://example.atlassian.net/rest/api/3/statuscategory/4",
+				"id": 4,
+				"key": "indeterminate",
+				"colorName": "yellow",
+				"name": "In Progress"
+			}
+		}
+	},
+	"parentId": "FLO-1368",
+	"flomatikaArrivalDate": "2021-09-16T05:02:57.045Z",
+	"flomatikaCommitmentDate": "2021-09-20T04:34:49.848Z"
+}
